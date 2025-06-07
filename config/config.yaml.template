@@ -1,12 +1,15 @@
-# Google Sheet settings
-worksheet_name: "CHANGE THIS!!!"
-
-# Email settings
-sender_email: "your-email@example.com"
-default_to_email: "recipient@example.com"
-
 # Google API settings
 scopes:
   - "https://www.googleapis.com/auth/drive"
   - "https://www.googleapis.com/auth/gmail.send"
   - "https://www.googleapis.com/auth/spreadsheets" 
+
+# Google Sheet settings
+demo_worksheet_name: "CHANGE THIS!!!"
+jersey_worksheet_name: "CHANGE THIS!!!"
+
+# Email settings
+demo_sender_email: "your-email@example.com"
+demo_default_to_email: "recipient@example.com"
+jersey_sender_email: "your-email@example.com"
+jersey_default_to_email: "recipient@example.com"
