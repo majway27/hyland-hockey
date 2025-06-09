@@ -12,16 +12,19 @@ from typing import Any, Dict, List, Optional
 class ConfigManager:
     """Manages configuration settings loaded from YAML files."""
     
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: Optional[str] = None, test: bool = False):
         """
         Initialize the configuration manager.
         
         Args:
             config_file: Optional path to a specific config file. If not provided,
                         will look for config.yaml in the config directory.
+            test: If True, will use test configuration values instead of production ones.
         """
         self._config: Dict[str, Any] = {}
+        self._test = test
         self._load_config(config_file)
+        print(f"Test mode: {self._test}")
     
     def _load_config(self, config_file: Optional[str] = None) -> None:
         """Load configuration from YAML file."""
@@ -48,40 +51,91 @@ class ConfigManager:
         with open(config_path) as f:
             self._config = yaml.load(f)
     
+    def _get_value(self, key: str) -> Any:
+        """Get a configuration value, respecting test mode."""
+        if self._test:
+            test_key = f"{key}_test"
+            if test_key not in self._config:
+                raise KeyError(f"Test configuration value '{test_key}' not found")
+            return self._config[test_key]
+        return self._config[key]
+    
+    @property
+    def is_test_mode(self) -> bool:
+        """Check if the config object is in test mode.
+        
+        Returns:
+            bool: True if the config object was created with test=True, False otherwise.
+        """
+        return self._test
+    
+    # Auth
     @property
     def scopes(self) -> List[str]:
         """Get Google API scopes."""
-        return self._config['scopes']
+        return self._get_value('scopes')
+    
+    # Record
+    @property
+    def demo_spreadsheet_name(self) -> str:
+        """Get demo spreadsheet name."""
+        return self._get_value('demo_spreadsheet_name')
     
     @property
-    def demo_worksheet_name(self) -> str:
-        """Get demo worksheet name."""
-        return self._config['demo_worksheet_name']
+    def jersey_spreadsheet_name(self) -> str:
+        """Get jersey spreadsheet name."""
+        return self._get_value('jersey_spreadsheet_name')
     
     @property
-    def jersey_worksheet_name(self) -> str:
-        """Get jersey worksheet name."""
-        return self._config['jersey_worksheet_name']
+    def demo_spreadsheet_id(self) -> str:
+        """Get demo spreadsheet ID."""
+        return self._get_value('demo_spreadsheet_id')
     
+    @property
+    def jersey_spreadsheet_id(self) -> str:
+        """Get jersey spreadsheet ID."""
+        return self._get_value('jersey_spreadsheet_id')
+
+    @property
+    def demo_worksheet_form_responses_gid(self) -> str:
+        """Get demo worksheet form responses GID."""
+        return self._get_value('demo_worksheet_form_responses_gid')
+    
+    @property
+    def demo_worksheet_jersey_orders_gid(self) -> str:
+        """Get demo worksheet jersey orders GID."""
+        return self._get_value('demo_worksheet_jersey_orders_gid')
+    
+    @property
+    def jersey_worksheet_jersey_orders_gid(self) -> str:
+        """Get jersey worksheet jersey orders GID."""
+        return self._get_value('jersey_worksheet_jersey_orders_gid')
+    
+    @property
+    def jersey_worksheet_jersey_orders_name(self) -> str:
+        """Get jersey worksheet jersey orders name."""
+        return self._get_value('jersey_worksheet_jersey_orders_name')
+    
+    # Message
     @property
     def demo_sender_email(self) -> str:
         """Get demo sender email."""
-        return self._config['demo_sender_email']
+        return self._get_value('demo_sender_email')
     
     @property
     def demo_default_to_email(self) -> str:
         """Get demo default recipient email."""
-        return self._config['demo_default_to_email']
+        return self._get_value('demo_default_to_email')
     
     @property
     def jersey_sender_email(self) -> str:
         """Get jersey sender email."""
-        return self._config['jersey_sender_email']
+        return self._get_value('jersey_sender_email')
     
     @property
     def jersey_default_to_email(self) -> str:
         """Get jersey default recipient email."""
-        return self._config['jersey_default_to_email']
+        return self._get_value('jersey_default_to_email')
     
     def get(self, key: str, default: Any = None) -> Any:
         """
@@ -93,5 +147,13 @@ class ConfigManager:
             
         Returns:
             The configuration value or default if not found
+            
+        Raises:
+            KeyError: If in test mode and the test key is not found
         """
+        if self._test:
+            test_key = f"{key}_test"
+            if test_key not in self._config:
+                raise KeyError(f"Test configuration value '{test_key}' not found")
+            return self._config[test_key]
         return self._config.get(key, default) 

@@ -1,6 +1,8 @@
 config.yaml
 token.pickle
+token_test.pickle
 credentials.json
+credentials_test.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
