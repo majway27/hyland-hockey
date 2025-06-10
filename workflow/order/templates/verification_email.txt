@@ -1,4 +1,4 @@
-Good morning, here is what you ordered for {participant_name} during registration:
+Good morning, here is what you ordered for {participant_first_name} during registration:
 
 - Jersey Name: {jersey_name}
 - Jersey #: {jersey_number}

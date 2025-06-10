@@ -19,19 +19,21 @@
     </style>
 </head>
 <body>
-    <p>Good morning, here is what you ordered for <strong>{participant_name}</strong> during registration:</p>
+    <p>Good morning, here is what you ordered for {participant_first_name} during registration:</p>
 
     <div class="order-details">
-        <div class="order-item"><strong>Jersey Name:</strong> {jersey_name}</div>
-        <div class="order-item"><strong>Jersey #:</strong> {jersey_number}</div>
-        <div class="order-item"><strong>Jersey Size:</strong> {jersey_size}</div>
-        <div class="order-item"><strong>Jersey Type:</strong> {jersey_type}</div>
-        <div class="order-item"><strong>Sock Size:</strong> {sock_size}</div>
-        <div class="order-item"><strong>Sock Type:</strong> {sock_type}</div>
-        <div class="order-item"><strong>Pant Shell Size:</strong> {pant_shell_size}</div>
+        <ul>
+            <li>Jersey Name: {jersey_name}</li>
+            <li>Jersey #: {jersey_number}</li>
+            <li>Jersey Size: {jersey_size}</li>
+            <li>Jersey Type: {jersey_type}</li>
+            <li>Sock Size: {sock_size}"</li>
+            <li>Sock Type: {sock_type}</li>
+            <li>Pant Shell Size: {pant_shell_size}</li>
+        </ul>
     </div>
 
-    <p><a href="{link}">Link</a></p>
+    <p><a href="{link}">{link}</a></p>
 
     <p>We do have samples available if you need to check the sizing but otherwise if everything looks good let me know and we'll get the order placed.</p>
 

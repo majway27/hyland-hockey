@@ -33,6 +33,7 @@ jersey_worksheet_jersey_orders_gid_test: "CHANGE_ME"
 # Email settings
 demo_sender_email: "your-email@example.com"
 demo_default_to_email: "recipient@example.com"
+
 jersey_sender_email: "your-email@example.com"
 jersey_sender_email_test: "your-email@example.com"
 jersey_default_to_email: "recipient@example.com"

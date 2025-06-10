@@ -21,7 +21,8 @@ class NoParentEmailError(Exception):
 class OrderDetails:
     """Data class for order details."""
     link: str
-    participant_name: str
+    participant_first_name: str
+    participant_full_name: str
     jersey_name: str
     jersey_number: str
     jersey_size: str
@@ -116,7 +117,8 @@ class OrderVerification:
                 #print(f"Debug - raw_link_value for {order.full_name}: {order.raw_link_value}")
                 pending_orders.append(OrderDetails(
                     link=order.raw_link_value,
-                    participant_name=order.full_name,
+                    participant_first_name=order.first_name,
+                    participant_full_name=order.full_name,
                     jersey_name=order.jersey_name or '',
                     jersey_number=order.jersey_number or '',
                     jersey_size=order.jersey_size or '',
@@ -159,7 +161,7 @@ class OrderVerification:
         template = self._load_template()
         signature = self._load_signature()
         return template.format(
-            participant_name=order.participant_name,
+            participant_first_name=order.participant_first_name,
             jersey_name=order.jersey_name,
             jersey_number=order.jersey_number,
             jersey_size=order.jersey_size,
@@ -193,7 +195,7 @@ class OrderVerification:
         ]
         
         if not parent_emails:
-            raise NoParentEmailError(f"No parent email found for order: {order.participant_name}")
+            raise NoParentEmailError(f"No parent email found for order: {order.participant_full_name}")
         
         # Join all parent emails with commas
         to_email = ", ".join(parent_emails)
@@ -201,7 +203,7 @@ class OrderVerification:
         draft = notify.create_gmail_draft(
             sender_email=self.sender_email,
             to_email=to_email,
-            subject=f"Order Verification for {order.participant_name}",
+            subject=f"{order.participant_full_name} Uniform Order Confirmation",
             message_text=email_content,
             config_manager=self.config
         )
@@ -232,7 +234,7 @@ class OrderVerification:
             jersey_orders = JerseyWorksheetJerseyOrder.all(self.config)
             order_found = False
             for jersey_order in jersey_orders:
-                if jersey_order.full_name == order.participant_name:
+                if jersey_order.full_name == order.participant_full_name:
                     # Update the contacted field with today's date in mm/dd format
                     jersey_order.contacted = FieldAwareDateTime(datetime.now().year, datetime.now().month, datetime.now().day, field_name='contacted')
                     jersey_order.save(fields_to_update=['contacted'])
@@ -240,7 +242,7 @@ class OrderVerification:
                     break
             
             if not order_found:
-                raise Exception(f"Could not find order for {order.participant_name} in the sheet")
+                raise Exception(f"Could not find order for {order.participant_full_name} in the sheet")
             
             return draft_id
             
