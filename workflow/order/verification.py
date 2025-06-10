@@ -10,7 +10,7 @@ from pathlib import Path
 
 from config.config_manager import ConfigManager
 import message.gmail as notify
-from workflow.order.models.jersey_worksheet_jersey_order import JerseyWorksheetJerseyOrder
+from workflow.order.models.jersey_worksheet_jersey_order import JerseyWorksheetJerseyOrder, FieldAwareDateTime
 
 
 class NoParentEmailError(Exception):
@@ -86,7 +86,14 @@ class OrderVerification:
                 invalid_rows.append(idx)
                 continue
                 
-            if not order.contacted and not order.confirmed:
+            # Check if the order has been contacted or confirmed
+            # A date value (FieldAwareDateTime or datetime) means it has been contacted/confirmed
+            # An empty string or None means it hasn't been contacted/confirmed
+            print(f"Debug - contacted: {order.contacted}")
+            is_contacted = isinstance(order.contacted, (FieldAwareDateTime, datetime)) or (isinstance(order.contacted, str) and order.contacted.strip())
+            is_confirmed = isinstance(order.confirmed, (FieldAwareDateTime, datetime)) or (isinstance(order.confirmed, str) and order.confirmed.strip())
+            
+            if not is_contacted and not is_confirmed:
                 # Check if any parent email exists
                 if not any([order.parent1_email, order.parent2_email, order.parent3_email, order.parent4_email]):
                     print(f"Warning: No parent email found for order: {order.full_name} (row {idx})")

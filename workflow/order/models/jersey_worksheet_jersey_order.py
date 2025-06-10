@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict
 import pandas as pd
 from record.sheets import read_google_sheet_by_id, update_cell
@@ -167,8 +167,8 @@ class JerseyWorksheetJerseyOrder:
             if df.empty:
                 return []
             
-            #print("Debug - Raw data from sheet:")
-            #print(df[['Link']].head())
+            print("Debug - Raw data from sheet:")
+            print(df[['Contacted']].head())
             
             orders = []
             for _, row in df.iterrows():
@@ -185,7 +185,9 @@ class JerseyWorksheetJerseyOrder:
                             attrs['_raw_link_value'] = row[header]  # Store raw value
                             attrs[column_name] = row[header]  # Store raw value for registration_deep_link too
                         else:
+                            print(f"Debug - Raw value for {column_name}: {row[header]}")
                             attrs[column_name] = cls._convert_value(column_name, row[header])
+                            print(f"Debug - Converted value for {column_name}: {attrs[column_name]}")
                 
                 orders.append(cls(config_manager=config_manager, **attrs))
             
@@ -298,12 +300,25 @@ class JerseyWorksheetJerseyOrder:
                 return None
         elif column_name in ['contacted', 'fitting', 'confirmed']:
             try:
-                # Handle MM/DD format
-                if '/' in str(value):
-                    month, day = str(value).split('/')
-                    # Use current year since it's not provided
-                    year = datetime.now().year
-                    return FieldAwareDateTime(year, int(month), int(day), field_name=column_name)
+                # Handle Excel serial numbers
+                if isinstance(value, (int, float)):
+                    # Convert Excel serial number to datetime
+                    # Excel's epoch is 1900-01-01, but it incorrectly considers 1900 a leap year
+                    # So we need to adjust for this by subtracting 1 day for dates after 1900-02-28
+                    excel_epoch = datetime(1899, 12, 30)
+                    days = int(value)
+                    date = excel_epoch + timedelta(days=days)
+                    return FieldAwareDateTime(date.year, date.month, date.day, field_name=column_name)
+                # Handle MM/DD/YYYY format
+                elif '/' in str(value):
+                    parts = str(value).split('/')
+                    if len(parts) == 3:  # MM/DD/YYYY format
+                        month, day, year = parts
+                        return FieldAwareDateTime(int(year), int(month), int(day), field_name=column_name)
+                    elif len(parts) == 2:  # MM/DD format
+                        month, day = parts
+                        year = datetime.now().year
+                        return FieldAwareDateTime(year, int(month), int(day), field_name=column_name)
                 return None
             except (ValueError, TypeError):
                 return None
