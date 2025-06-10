@@ -89,7 +89,7 @@ class OrderVerification:
             # Check if the order has been contacted or confirmed
             # A date value (FieldAwareDateTime or datetime) means it has been contacted/confirmed
             # An empty string or None means it hasn't been contacted/confirmed
-            print(f"Debug - contacted: {order.contacted}")
+            #print(f"Debug - contacted: {order.contacted}")
             is_contacted = isinstance(order.contacted, (FieldAwareDateTime, datetime)) or (isinstance(order.contacted, str) and order.contacted.strip())
             is_confirmed = isinstance(order.confirmed, (FieldAwareDateTime, datetime)) or (isinstance(order.confirmed, str) and order.confirmed.strip())
             
@@ -151,7 +151,8 @@ class OrderVerification:
             jersey_type=order.jersey_type,
             sock_size=order.sock_size,
             sock_type=order.sock_type,
-            pant_shell_size=order.pant_shell_size
+            pant_shell_size=order.pant_shell_size,
+            link=order.link
         )
     
     def create_verification_gmail_draft(self, order: OrderDetails) -> str:
@@ -217,7 +218,7 @@ class OrderVerification:
             for jersey_order in jersey_orders:
                 if jersey_order.full_name == order.participant_name:
                     # Update the contacted field with today's date in mm/dd format
-                    jersey_order.contacted = datetime.now().strftime('%m/%d')
+                    jersey_order.contacted = FieldAwareDateTime(datetime.now().year, datetime.now().month, datetime.now().day, field_name='contacted')
                     jersey_order.save(fields_to_update=['contacted'])
                     order_found = True
                     break

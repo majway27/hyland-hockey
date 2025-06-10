@@ -167,8 +167,8 @@ class JerseyWorksheetJerseyOrder:
             if df.empty:
                 return []
             
-            print("Debug - Raw data from sheet:")
-            print(df[['Contacted']].head())
+            #Eprint("Debug - Raw data from sheet:")
+            #print(df[['Contacted']].head())
             
             orders = []
             for _, row in df.iterrows():
@@ -185,9 +185,9 @@ class JerseyWorksheetJerseyOrder:
                             attrs['_raw_link_value'] = row[header]  # Store raw value
                             attrs[column_name] = row[header]  # Store raw value for registration_deep_link too
                         else:
-                            print(f"Debug - Raw value for {column_name}: {row[header]}")
+                            #print(f"Debug - Raw value for {column_name}: {row[header]}")
                             attrs[column_name] = cls._convert_value(column_name, row[header])
-                            print(f"Debug - Converted value for {column_name}: {attrs[column_name]}")
+                            #print(f"Debug - Converted value for {column_name}: {attrs[column_name]}")
                 
                 orders.append(cls(config_manager=config_manager, **attrs))
             
@@ -341,11 +341,11 @@ class JerseyWorksheetJerseyOrder:
             return ''
         elif isinstance(value, FieldAwareDateTime):
             if value.field_name in ['contacted', 'fitting', 'confirmed']:
-                return value.strftime('%m/%d')
+                return value.strftime('%m/%d/%Y')
             elif value.field_name == 'registered':
                 return value.strftime('%Y-%m-%d')
-            # Default to MM/DD for backward compatibility
-            return value.strftime('%m/%d')
+            # Default to MM/DD/YYYY for backward compatibility
+            return value.strftime('%m/%d/%Y')
         elif isinstance(value, datetime):
             return value.strftime('%Y-%m-%d')
         elif isinstance(value, bool):

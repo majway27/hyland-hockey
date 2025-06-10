@@ -90,8 +90,25 @@ def update_cell(spreadsheet_id, worksheet_gid, cell_reference, value, config_man
         worksheet = spreadsheet.get_worksheet_by_id(int(worksheet_gid))
 
         # Update the cell with the value in a list format as required by the API
-        # The worksheet.update method will handle the range formatting internally
-        worksheet.update(cell_reference, [[value]])
+        # Use valueInputOption='USER_ENTERED' to allow Google Sheets to parse the values
+        worksheet.update(cell_reference, [[value]], value_input_option='USER_ENTERED')
+        
+        # Extract column letter from cell reference (e.g., 'A1' -> 'A')
+        column_letter = ''.join(filter(str.isalpha, cell_reference))
+        
+        # Get the header row to find column names
+        headers = worksheet.row_values(1)
+        column_index = ord(column_letter.upper()) - ord('A')
+        column_name = headers[column_index] if column_index < len(headers) else None
+        
+        # Only apply date formatting to specific columns
+        if column_name in ['Contacted', 'Fitting', 'Confirmed']:
+            worksheet.format(cell_reference, {
+                "numberFormat": {
+                    "type": "DATE",
+                    "pattern": "M/d"
+                }
+            })
         
         return True
     except Exception as e:

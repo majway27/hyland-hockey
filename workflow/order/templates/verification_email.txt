@@ -8,6 +8,8 @@ Good morning, here is what you ordered for {participant_name} during registratio
 - Sock Type: {sock_type}
 - Pant Shell Size: {pant_shell_size}
 
+Link: {link}
+
 We do have samples available if you need to check the sizing but otherwise if everything looks good let me know and we'll get the order placed.
 
 Best regards,
