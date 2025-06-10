@@ -22,6 +22,7 @@ class ParentContact:
 class JerseyWorksheetJerseyOrder:
     # Column mappings
     COLUMN_MAPPINGS = {
+        'registration_deep_link': 'Link',
         'last_name': 'Last',
         'first_name': 'First',
         'birthdate': 'Birthdate',
@@ -62,6 +63,10 @@ class JerseyWorksheetJerseyOrder:
 
     def __init__(self, config_manager: ConfigManager, **kwargs):
         self.config_manager = config_manager
+        
+        # Link field
+        self.registration_deep_link: str = kwargs.get('registration_deep_link', '')
+        self._raw_link_value: str = kwargs.get('_raw_link_value', '')  # Store raw value
         
         # Required fields
         self.last_name: str = kwargs.get('last_name', '')
@@ -143,6 +148,12 @@ class JerseyWorksheetJerseyOrder:
     def volunteers(self) -> int:
         return sum(1 for parent in self.parent_contacts if parent.volunteer)
 
+    @property
+    def raw_link_value(self) -> str:
+        """Get the raw link value from the sheet, preserving the HYPERLINK formula if present."""
+        #print(f"Debug - _raw_link_value in property: {self._raw_link_value}")
+        return self._raw_link_value
+
     @classmethod
     def all(cls, config_manager: ConfigManager) -> List['JerseyWorksheetJerseyOrder']:
         try:
@@ -156,6 +167,9 @@ class JerseyWorksheetJerseyOrder:
             if df.empty:
                 return []
             
+            #print("Debug - Raw data from sheet:")
+            #print(df[['Link']].head())
+            
             orders = []
             for _, row in df.iterrows():
                 # Create a dictionary of attributes
@@ -166,7 +180,12 @@ class JerseyWorksheetJerseyOrder:
                         None
                     )
                     if column_name:
-                        attrs[column_name] = cls._convert_value(column_name, row[header])
+                        # Store both processed and raw values for the link
+                        if column_name == 'registration_deep_link':
+                            attrs['_raw_link_value'] = row[header]  # Store raw value
+                            attrs[column_name] = row[header]  # Store raw value for registration_deep_link too
+                        else:
+                            attrs[column_name] = cls._convert_value(column_name, row[header])
                 
                 orders.append(cls(config_manager=config_manager, **attrs))
             
@@ -263,6 +282,10 @@ class JerseyWorksheetJerseyOrder:
         if pd.isna(value) or value == '':
             return None
             
+        if column_name == 'registration_deep_link':
+            # For registration_deep_link, we want to preserve the raw value
+            return value
+            
         if column_name == 'birthdate':
             try:
                 return datetime.strptime(str(value), '%Y-%m-%d')
@@ -312,4 +335,7 @@ class JerseyWorksheetJerseyOrder:
             return value.strftime('%Y-%m-%d')
         elif isinstance(value, bool):
             return str(value).lower()
+        elif isinstance(value, str) and value.startswith('http'):
+            # Format URLs as HYPERLINK formulas
+            return f'=HYPERLINK("{value}","Link")'
         return str(value) 

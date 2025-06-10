@@ -59,10 +59,9 @@ def read_google_sheet_by_id(spreadsheet_id, worksheet_gid, config_manager: Confi
     # Get the specific worksheet by gid
     worksheet = spreadsheet.get_worksheet_by_id(int(worksheet_gid))
 
-    # Get all values and convert to pandas DataFrame
-    data = worksheet.get_all_values()
-    headers = data[0]
-    df = pd.DataFrame(data[1:], columns=headers)
+    # Get all values with formulas and convert to pandas DataFrame
+    data = worksheet.get_all_records(value_render_option='UNFORMATTED_VALUE')
+    df = pd.DataFrame(data)
 
     return df
 

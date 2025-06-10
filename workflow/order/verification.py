@@ -1,3 +1,8 @@
+"""
+This module contains the OrderVerification class, which is used to verify orders and send verification emails.
+See WORKFLOW.md for the functional architecture that includes this module.
+"""
+
 from dataclasses import dataclass
 from typing import List, Optional
 from datetime import datetime
@@ -14,6 +19,7 @@ class NoParentEmailError(Exception):
 
 @dataclass
 class OrderDetails:
+    link: str
     participant_name: str
     jersey_name: str
     jersey_number: str
@@ -26,6 +32,9 @@ class OrderDetails:
     parent2_email: str
     parent3_email: str
     parent4_email: str
+    contacted: str
+    fitting: str
+    confirmed: str
 
 class OrderVerification:
     def __init__(self, config_manager: ConfigManager):
@@ -83,7 +92,9 @@ class OrderVerification:
                     print(f"Warning: No parent email found for order: {order.full_name} (row {idx})")
                     continue
                 
+                #print(f"Debug - raw_link_value for {order.full_name}: {order.raw_link_value}")
                 pending_orders.append(OrderDetails(
+                    link=order.raw_link_value,
                     participant_name=order.full_name,
                     jersey_name=order.jersey_name or '',
                     jersey_number=order.jersey_number or '',
@@ -95,7 +106,10 @@ class OrderVerification:
                     parent1_email=order.parent1_email or '',
                     parent2_email=order.parent2_email or '',
                     parent3_email=order.parent3_email or '',
-                    parent4_email=order.parent4_email or ''
+                    parent4_email=order.parent4_email or '',
+                    contacted=order.contacted or '',
+                    fitting=order.fitting or '',
+                    confirmed=order.confirmed or ''
                 ))
         
         if invalid_rows:
