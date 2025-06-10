@@ -19,6 +19,7 @@ class NoParentEmailError(Exception):
 
 @dataclass
 class OrderDetails:
+    """Data class for order details."""
     link: str
     participant_name: str
     jersey_name: str
@@ -46,6 +47,7 @@ class OrderVerification:
         self.config = config_manager
         self.sender_email = self.config.jersey_sender_email
         self.template_path = Path(__file__).parent / 'templates' / 'verification_email.html'
+        self.signature_path = Path(__file__).parent.parent.parent / 'config' / 'email_signature.html'
         
     def _load_template(self) -> str:
         """Load the email template from file.
@@ -58,6 +60,18 @@ class OrderVerification:
                 return f.read()
         except FileNotFoundError:
             raise FileNotFoundError(f"Email template not found at {self.template_path}")
+            
+    def _load_signature(self) -> str:
+        """Load the email signature from file.
+        
+        Returns:
+            The signature content as a string
+        """
+        try:
+            with open(self.signature_path, 'r') as f:
+                return f.read()
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Email signature not found at {self.signature_path}")
     
     def get_pending_orders(self) -> List[OrderDetails]:
         """Get all orders pending verification.
@@ -143,6 +157,7 @@ class OrderVerification:
             Formatted email content as a string
         """
         template = self._load_template()
+        signature = self._load_signature()
         return template.format(
             participant_name=order.participant_name,
             jersey_name=order.jersey_name,
@@ -152,7 +167,8 @@ class OrderVerification:
             sock_size=order.sock_size,
             sock_type=order.sock_type,
             pant_shell_size=order.pant_shell_size,
-            link=order.link
+            link=order.link,
+            signature=signature
         )
     
     def create_verification_gmail_draft(self, order: OrderDetails) -> str:
